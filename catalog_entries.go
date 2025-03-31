@@ -116,36 +116,35 @@ func (o *GetCatalogEntriesOptions) Run(ctx context.Context, logger kitlog.Logger
 
 			return nil
 		}
-	}
-
-	res, err := ListAllCatalogEntries(ctx, logger, cl)
-	if err != nil {
-		return fmt.Errorf("failed to find catalog entry: %s", err)
-	}
-
-	if o.catalogEntryName != "" {
-		n := 0
-		for _, v := range res {
-			if v.Name == o.catalogEntryName {
-				res[n] = v
-				n++
-			}
+	} else {
+		res, err := ListAllCatalogEntries(ctx, logger, cl)
+		if err != nil {
+			return fmt.Errorf("failed to list all catalog entries: %s", err)
 		}
-		res = res[:n]
-	} else if o.catalogEntryID != "" {
-		n := 0
-		for _, v := range res {
-			if v.Id == o.catalogEntryID {
-				res[n] = v
-				n++
+
+		if o.catalogEntryName != "" {
+			n := 0
+			for _, v := range res {
+				if v.Name == o.catalogEntryName {
+					res[n] = v
+					n++
+				}
 			}
+			res = res[:n]
+		} else if o.catalogEntryID != "" {
+			n := 0
+			for _, v := range res {
+				if v.Id == o.catalogEntryID {
+					res[n] = v
+					n++
+				}
+			}
+			res = res[:n]
 		}
-		res = res[:n]
-	}
 
-	if err := serialize(res); err != nil {
-		return fmt.Errorf("failed to marshal json: %q", err)
+		if err := serialize(res); err != nil {
+			return fmt.Errorf("failed to marshal json: %q", err)
+		}
 	}
-
 	return nil
 }
